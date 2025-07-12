@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      :root {
+        --bg-color: #eef3ff;
+        --card-bg: #ffffffee;
+        --text-color: #222;
+        --input-bg: #fff;
+        --button-bg: #6366f1;
+        --button-text: #fff;
+        --progress-bg: #e0e0e0;
+        --progress-fill: #6366f1;
+      }
+
+      body.dark {
+        --bg-color: #0c1022;
+        --card-bg: #1a1e2e;
+        --text-color: #f5f5f5;
+        --input-bg: #2a2e3e;
+        --button-bg: #bb86fc;
+        --button-text: #000;
+        --progress-bg: #333;
+        --progress-fill: #bb86fc;
+      }
+
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, var(--bg-color), #c8d5ff);
+        background-attachment: fixed;
+        color: var(--text-color);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+        transition: background 0.3s, color 0.3s;
+      }
+
+      .dark-toggle {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        background: var(--button-bg);
+        color: var(--button-text);
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 18px;
+        cursor: pointer;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      }
+
+      .container {
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        width: 100%;
+        max-width: 500px;
+        animation: slideIn 0.6s ease-out;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateY(40px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      h2 {
+        text-align: center;
+        margin-bottom: 1.5rem;
+      }
+
+      label {
+        font-weight: 600;
+        display: block;
+        margin-top: 1rem;
+      }
+
+      input[type="text"],
+      input[type="tel"],
+      input[type="email"],
+      input[type="file"] {
+        width: 100%;
+        padding: 10px;
+        margin-top: 6px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        background-color: var(--input-bg);
+        color: var(--text-color);
+        box-sizing: border-box;
+      }
+
+      button {
+        margin-top: 1rem;
+        padding: 12px;
+        width: 100%;
+        background-color: var(--button-bg);
+        color: var(--button-text);
+        font-weight: bold;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      }
+
+      button:hover {
+        transform: scale(1.02);
+      }
+
+      #counter {
+        text-align: center;
+        font-weight: bold;
+        margin-top: 0.3rem;
+      }
+
+      #message {
+        text-align: center;
+        font-size: 1.2rem;
+        padding: 20px;
+        display: none;
+      }
+
+      .progress-bar {
+        margin-top: 10px;
+        height: 12px;
+        background: var(--progress-bg);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: var(--progress-fill);
+        transition: width 0.3s;
+      }
+
+      @media (max-width: 500px) {
+        .container {
+          padding: 1.2rem;
+          border-radius: 16px;
+        }
+
+        h2 {
+          font-size: 1.4rem;
+        }
+
+        input,
+        button {
+          font-size: 1rem;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <button class="dark-toggle" onclick="toggleDark()">🌙</button>
+
+    <div class="container" id="form-section">
+      <h2>🚀 Tech For Girls - Registration</h2>
+
+      <label>Name:</label>
+      <input type="text" id="name" />
+
+      <label>Phone Number:</label>
+      <input type="tel" id="phone" />
+
+      <label>Email:</label>
+      <input type="email" id="email" />
+
+      <label>College/Department:</label>
+      <input type="text" id="college" />
+
+      <label>Upload Screenshot:</label>
+      <input type="file" id="screenshot" accept="image/*" />
+
+      <button onclick="shareWhatsApp()">📤 Share on WhatsApp</button>
+      <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
+      <p id="counter">Click count: 0/5</p>
+
+      <button onclick="copyLink()">🔗 Copy Registration Link</button>
+      <button onclick="submitForm()" id="submitBtn" disabled>✅ Submit Registration</button>
+    </div>
+
+    <div id="message"></div>
+
+    <script>
+      let clickCount = 0;
+      const maxClicks = 5;
+      const regLink = "https://script.google.com/macros/s/AKfycbznBHu6hDdiGws5jmfEmlSRPRVe_x5s08EN1F243nzPcSIGEDx4rJHRBTXd_LJnt-TS/exec";
+
+
+      const counter = document.getElementById("counter");
+      const submitBtn = document.getElementById("submitBtn");
+      const progress = document.getElementById("progressBar");
+
+      if (localStorage.getItem("submitted") === "true") {
+        document.getElementById("form-section").style.display = "none";
+        const msgBox = document.getElementById("message");
+        msgBox.style.display = "block";
+        msgBox.innerText = "🎉 You have already submitted the form. Thank you!";
+      }
+
+      function toggleDark() {
+        document.body.classList.toggle("dark");
+        const btn = document.querySelector(".dark-toggle");
+        btn.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
+      }
+
+      function updateProgress() {
+        const percent = (clickCount / maxClicks) * 100;
+        progress.style.width = `${percent}%`;
+        counter.innerText = `Click count: ${clickCount}/${maxClicks}`;
+        submitBtn.disabled = clickCount < maxClicks;
+      }
+
+      function shareWhatsApp() {
+        if (clickCount < maxClicks) {
+          const msg = `🚀 Join *Tech For Girls*! Register here: ${regLink}`;
+          const link = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+          window.open(link, "_blank");
+          clickCount++;
+          updateProgress();
+          if (clickCount === maxClicks) {
+            alert("✅ All shares done! You can now submit the form.");
+          }
+        }
+      }
+
+      function copyLink() {
+        navigator.clipboard.writeText(regLink).then(() => {
+          alert("🔗 Registration link copied to clipboard!");
+        });
+      }
+
+      function submitForm() {
+        if (clickCount < maxClicks) {
+          alert("⚠️ Please share 5 times on WhatsApp first.");
+          return;
+        }
+
+        const name = document.getElementById("name").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const college = document.getElementById("college").value.trim();
+        const fileInput = document.getElementById("screenshot").files[0];
+
+        if (!name || !phone || !email || !college || !fileInput) {
+          alert("❗ Please fill all fields and upload your screenshot.");
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = function () {
+          const base64Data = reader.result.split(",")[1];
+
+          const payload = {
+            name,
+            phone,
+            email,
+            college,
+            file: {
+              filename: fileInput.name,
+              mimeType: fileInput.type,
+              base64: base64Data,
+            },
+          };
+
+          const scriptURL = "https://script.google.com/macros/s/AKfycbznBHu6hDdiGws5jmfEmlSRPRVe_x5s08EN1F243nzPcSIGEDx4rJHRBTXd_LJnt-TS/exec";
+
+          fetch(scriptURL, {
+            method: "POST",
+            body: JSON.stringify(payload),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+            .then((res) => res.json())
+            .then((result) => {
+              if (result.status === "success") {
+                localStorage.setItem("submitted", "true");
+                document.getElementById("form-section").style.display = "none";
+                const msgBox = document.getElementById("message");
+                msgBox.style.display = "block";
+                msgBox.innerText = "🎉 Your submission has been recorded. Thank you!";
+              } else {
+                alert("❌ Error: " + result.message);
+              }
+            })
+            .catch((err) => {
+              console.error("Error:", err);
+              alert("⚠️ Something went wrong while submitting. Please try again.");
+            });
+        };
+        reader.readAsDataURL(fileInput);
+      }
+    </script>
+  </body>
+</html>
